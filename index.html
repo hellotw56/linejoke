@@ -1,82 +1,170 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
+
 <head>
-  <meta charset="UTF-8">
-  <title>年齡確認</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      background: url("https://iw233.cn/api.php?sort=mp") no-repeat center center fixed;
-      background-size: cover;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title></title>
+    <style type="text/css">
+        p {
+            margin: 0;
+        }
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 30px;
-      border-radius: 15px;
-      text-align: center;
-      color: white;
-    }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
 
-    button {
-      margin: 10px;
-      padding: 15px 25px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+        .overlay,
+        .scare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100vw;
+        }
 
-    .yes {
-      background-color: #28a745;
-      color: white;
-    }
-    .yes:hover { background-color: #218838; }
+        p.overlay-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
 
-    .no {
-      background-color: #dc3545;
-      color: white;
-    }
-    .no:hover { background-color: #c82333; }
+        .overlay-button {
+            display: inline-flex;
+            align-items: center;
+            height: 40px;
+            padding-right: 24px;
+            padding-left: 24px;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1;
+            border-radius: 4px;
+            margin: 4px;
+            cursor: pointer;
+        }
 
-    video {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: 1000;
-    }
-  </style>
+        .overlay-buttons-wrapper {
+            margin: 24px -8px -8px;
+        }
+
+        #accept-button {
+            background-color: rgb(255, 0, 0);
+            color: white;
+        }
+
+        #decline-button {
+            color: rgb(255, 255, 255);
+            border: 2px solid rgb(255, 255, 255);
+        }
+
+        p.overlay-description {
+            font-size: 16px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.25;
+            margin-bottom: 16px;
+        }
+
+        .overlay-body {
+            max-width: 512px;
+            text-align: center;
+            font-family: "Inter", sans-serif;
+        }
+
+        .overlay[hidden] {
+            display: none;
+        }
+
+        .overlay {
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: black; /* 全黑背景 */
+        }
+
+        .text-bg {
+            background-color: rgba(0, 0, 0, 0.8); /* 文字框微透明黑 */
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .scare {
+            z-index: 1;
+        }
+
+        video#video {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        video#video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="overlay" id="age-check">
-    <h2>請確認您的年齡</h2>
-    <button class="no" onclick="alert('未滿18歲禁止觀看！')">未滿 18 歲</button>
-    <button class="yes" onclick="rickroll()">滿 18 歲</button>
-  </div>
+    <div id="overlay" class="overlay">
+        <div class="text-bg">
+            <div class="overlay-body">
+                <p class="overlay-title">您是否已滿18歲</p>
+                <p class="overlay-description">以下内容可能不適合<b>未滿18歲</b>的人群觀看，我們需要確認您的年齡。</p>
+                <p class="overlay-description">The following may not be suitable for people <b>under the age of
+                        18</b> and we need to confirm your age.</p>
+                <div class="overlay-buttons-wrapper">
+                    <div id="accept-button" class="overlay-button">已滿18歲</div>
+                    <div id="decline-button" class="overlay-button">未滿18歲</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="scare">
+        <video id="video" class="video" src="https://vdse.bdstatic.com/192d9a98d782d9c74c96f09db9378d93.mp4"
+            loop="loop"></video>
+        <img src="https://count.getloli.com/get/@rickroll" style="display: none;">
+    </div>
+    <script type="text/javascript">
+        const video = document.getElementById("video");
+        const overlay = document.getElementById("overlay");
+        const declineButton = document.getElementById("decline-button");
+        const acceptButton = document.getElementById("accept-button");
+        let hasClicked;
 
-  <script>
-    function rickroll() {
-      document.body.innerHTML = `
-        <video id="video" autoplay controls>
-          <source src="rickroll.mp4" type="video/mp4">
-          您的瀏覽器不支援 HTML5 video.
-        </video>`;
+        window.onbeforeunload = function () {
+            if (hasClicked) return true;
+        };
 
-      let video = document.getElementById("video");
-      // 嘗試全螢幕
-      let req = video.requestFullscreen 
-             || video.webkitRequestFullscreen 
-             || video.msRequestFullscreen;
-      if (req) req.call(video);
-    }
-  </script>
+        function buttonClick1(event) {https://github.com/hellotw56/linejoke/blob/index/index.html
+            event.preventDefault();
+            if (!hasClicked) hasClicked = true;
+            overlay.hidden = true;
+            video.play();
+            videoClick();
+        }
+
+        function buttonClick2(event) {
+            event.preventDefault();
+            alert("年齡未達，無法觀看");
+        }
+
+        function videoClick(event) {
+            if (event) event.preventDefault();
+            const { documentElement } = document;
+            if (documentElement.requestFullscreen) documentElement.requestFullscreen();
+            else if (documentElement.mozRequestFullScreen) documentElement.mozRequestFullScreen();
+            else if (documentElement.webkitRequestFullscreen) documentElement.webkitRequestFullscreen();
+            else if (documentElement.msRequestFullscreen) documentElement.msRequestFullscreen();
+        }
+
+        acceptButton.addEventListener("click", buttonClick1);
+        declineButton.addEventListener("click", buttonClick2);
+        video.addEventListener("click", videoClick);
+    </script>
 </body>
 </html>
